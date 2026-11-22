@@ -16,11 +16,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Scan project with Trivy
+      - name: Build backend image
+        run: docker build -t mern-backend:scan ./backend
+
+      - name: Build frontend image
+        run: docker build -t mern-frontend:scan ./frontend
+
+      - name: Scan source files
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: '0'
+
+      - name: Scan backend Docker image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: mern-backend:scan
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: '0'
+
+      - name: Scan frontend Docker image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: mern-frontend:scan
           format: table
           severity: HIGH,CRITICAL
           exit-code: '0'
